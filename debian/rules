@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+
+export PYBUILD_AFTER_CLEAN=rm -rf msal.egg-info docs/_build docs/api
+
+source:
+	:
+
+%:
+	dh $@ --buildsystem=pybuild
+
+override_dh_auto_build:
+	dh_auto_build
+ifeq (,$(findstring nodoc,$(DEB_BUILD_OPTIONS)))
+ifeq (,$(findstring nodoc,$(DEB_BUILD_PROFILES)))
+	sphinx-apidoc -f -e -o docs/api msal
+	$(MAKE) -C docs man
+endif
+endif
+
+# tests will attempt network connections, skip them
+override_dh_auto_test:
